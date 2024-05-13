@@ -15,7 +15,7 @@ import io.github.junrdev.newsify.model.NewsItem
 class TopHeadlineAdapter(
     val context: Context,
     val topHeadlines: List<NewsItem>,
-    val onNewsPicked: ((newsItem: NewsItem) -> Unit)? = null
+    val onNewsPicked: ((newsItem: NewsItem, holder: VH?) -> Unit)? = null
 ) :
     RecyclerView.Adapter<TopHeadlineAdapter.VH>() {
 
@@ -25,7 +25,7 @@ class TopHeadlineAdapter(
         val preview: ImageView = itemView.findViewById(R.id.newsPreview)
         val newsCard: CardView = itemView.findViewById(R.id.newsCard)
 
-        fun bind(newsItem: NewsItem) {
+        fun bind(newsItem: NewsItem, holder: VH) {
             newsItem.apply {
                 newsTitle.setText(newsItem.title)
 
@@ -38,7 +38,7 @@ class TopHeadlineAdapter(
             }
 
             newsCard.setOnClickListener {
-                onNewsPicked?.invoke(newsItem)
+                onNewsPicked?.invoke(newsItem, holder)
             }
         }
 
@@ -54,6 +54,6 @@ class TopHeadlineAdapter(
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val cur = topHeadlines[position]
-        holder.bind(cur)
+        holder.bind(cur, holder)
     }
 }

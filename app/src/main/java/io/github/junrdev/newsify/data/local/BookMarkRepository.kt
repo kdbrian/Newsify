@@ -16,6 +16,7 @@ class BookMarkRepository(
 
     fun addToBookMark(newsItem: NewsItem) {
         scope.launch {
+            newsItem.isBookMark = true
             bookmarkDao.insertBookMark(newsItem)
         }
     }

@@ -33,6 +33,7 @@ class Actions : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
         fragmnentHost = findViewById(R.id.fragmentHost)
         bottomNavigationView = findViewById(R.id.bottomNavigation)
 

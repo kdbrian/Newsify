@@ -27,22 +27,28 @@ class NewsRepository(val context: Context) {
 
     private var newsAPIService = retrofit.create(NewsAPIService::class.java)
 
-    val scope = CoroutineScope(Dispatchers.IO)
+    suspend fun getNewsBySearchWord(
+        query: String,
+        onError: ((error: String) -> Unit)? = null
+    ): NewsResponse? {
+        val response = newsAPIService.getNewsBySearchString(query)
 
-    suspend fun getNewsBySearchWord(query: String): NewsResponse {
+        Log.d(TAG, "getNewsBySearchWord: ${response.isSuccessful}")
 
-        val news = scope.async {
-            newsAPIService.getNewsBySearchString(query)
-        }.await()
+        if ( ! response.isSuccessful) {
+            onError?.invoke(response.errorBody()?.string()!!)
+        }
 
-        return news
+        return response.body() ?: null
     }
 
-    suspend fun getTopHeadlines(): NewsResponse {
-        val news = scope.async {
-            newsAPIService.getTopHeadlines()
-        }.await()
+    suspend fun getTopHeadlines(onError: ((error: String) -> Unit)? = null): NewsResponse? {
+        val response = newsAPIService.getTopHeadlines()
 
-        return news
+        if (!response.isSuccessful) {
+            onError?.invoke(response.errorBody()?.string()!!)
+        }
+
+        return response.body() ?: null
     }
 }

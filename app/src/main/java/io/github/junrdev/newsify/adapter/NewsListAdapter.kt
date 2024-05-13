@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import io.github.junrdev.newsify.R
 import io.github.junrdev.newsify.data.local.BookMarkRepository
 import io.github.junrdev.newsify.model.NewsItem
@@ -41,7 +42,9 @@ class NewsListAdapter(
                     .load(it)
                     .centerCrop()
                     .placeholder(R.drawable.demoimg)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(previewImage)
+
             }
 
             bookmarkNews.setOnClickListener {

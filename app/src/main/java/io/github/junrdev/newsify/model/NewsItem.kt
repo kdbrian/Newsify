@@ -4,24 +4,26 @@ import android.os.Parcel
 import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
 import androidx.room.TypeConverters
-import com.google.gson.Gson
+import java.time.LocalDateTime
 
-@Entity()
-@TypeConverters(NewsSourceConverter::class)
+@Entity(tableName = "news")
+@TypeConverters(Converters.NewsSourceConverter::class)
 data class NewsItem(
+    @PrimaryKey(autoGenerate = true) val id: Long? = 0L,
     val source: NewsSource,
     val author: String? = null,
-    @PrimaryKey val title: String,
-    val description: String,
-    val url: String,
+    val title: String?=null,
+    val description: String?=null,
+    val url: String?=null,
     val urlToImage: String? = null,
-    val publishedAt: String,
-    val content: String
+    val publishedAt: String?=null,
+    val content: String?=null,
+    var isBookMark: Boolean = false,
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
+        parcel.readLong() ?: null,
         parcel.readParcelable(NewsSource::class.java.classLoader) ?: NewsSource(null, ""),
         parcel.readString() ?: "",
         parcel.readString() ?: "",
@@ -29,7 +31,9 @@ data class NewsItem(
         parcel.readString() ?: "",
         parcel.readString() ?: "",
         parcel.readString() ?: "",
-        parcel.readString() ?: ""
+        parcel.readString() ?: "",
+        parcel.readBoolean(),
+//        parcel.readSerializable() as LocalDateTime,
     )
 
     override fun describeContents(): Int {
@@ -37,6 +41,7 @@ data class NewsItem(
     }
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeLong(id?:0)
         dest.writeParcelable(source, flags)
         dest.writeString(author)
         dest.writeString(title)
@@ -45,6 +50,7 @@ data class NewsItem(
         dest.writeString(urlToImage)
         dest.writeString(publishedAt)
         dest.writeString(content)
+        dest.writeBoolean(isBookMark)
     }
 
     companion object CREATOR : Parcelable.Creator<NewsItem> {
@@ -87,21 +93,6 @@ data class NewsSource(
         override fun newArray(size: Int): Array<NewsSource?> {
             return arrayOfNulls(size)
         }
-    }
-
-}
-
-
-class NewsSourceConverter {
-
-    @TypeConverter
-    fun fromSource(source: NewsSource): String {
-        return Gson().toJson(source)
-    }
-
-    @TypeConverter
-    fun toSource(string: String): NewsSource {
-        return Gson().fromJson(string, NewsSource::class.java)
     }
 
 }

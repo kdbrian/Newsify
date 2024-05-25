@@ -12,13 +12,13 @@ interface NewsAPIService {
     @GET("everything")
     suspend fun getNewsBySearchString(
         @Query("q") query: String,
-        @Query("apiKey") apiKey: String = ""
+        @Query("apiKey") apiKey: String = ApiKeyProvider.API_KEY
     ): Response<NewsResponse>
 
     @GET("top-headlines")
     suspend fun getTopHeadlines(
         @Query("country") country: String = "US".lowercase(),
-        @Query("apiKey") apiKey: String = ""
+        @Query("apiKey") apiKey: String = ApiKeyProvider.API_KEY
     ): Response<NewsResponse>
 
 }

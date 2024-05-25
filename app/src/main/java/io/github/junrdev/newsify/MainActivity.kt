@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity(), OnQueryTextListener {
         noInternet = findViewById(R.id.noInternet)
         newsRepository = NewsRepository(applicationContext)
         bookMarkRepository = BookMarkRepository(applicationContext)
-        connectivityReciever = ConnectivityReciever(onNetworkStateChange)
+        connectivityReciever = ConnectivityReciever()
         cacheRepository = CacheRepository(
             applicationContext,
             AppDatabase.getAppDatabase(applicationContext).cacheDao()
@@ -144,8 +144,9 @@ class MainActivity : AppCompatActivity(), OnQueryTextListener {
     }
 
     private fun loadCache(){
-        CoroutineScope(Dispatchers.IO).launch {
 
+        newsList.adapter = null
+        CoroutineScope(Dispatchers.IO).launch {
             val cache = cacheRepository.getCachedNews()
 
             Log.d(TAG, "onCreate: cache $cache")
@@ -186,9 +187,8 @@ class MainActivity : AppCompatActivity(), OnQueryTextListener {
     }
 
     override fun onQueryTextSubmit(query: String?): Boolean {
+        newsList.adapter = null
         if (checkInternetConnection()) {
-            newsList.adapter = null
-
             if (query?.isNotEmpty()!!) {
 
                 val searchQuery = when (query?.contains(" ")) {
@@ -203,6 +203,8 @@ class MainActivity : AppCompatActivity(), OnQueryTextListener {
                         newsRepository.getNewsBySearchWord(searchQuery, onError = { onError(it) })!!
 
                     // add to cache
+                    cacheRepository.deleteCachePast()
+
                     if (news.articles.isNotEmpty()) {
                         cacheRepository.addNewsToCache(news.articles)
                     }

@@ -6,21 +6,22 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 
 private const val TAG = "ConnectivityReciever"
 
-class ConnectivityReciever(val onNetworkStateChange: (connected: Boolean) -> Unit) :
+class ConnectivityReciever(val onNetworkStateChange: ((connected: Boolean) -> Unit)? = null) :
     BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-
         if (intent?.action == ConnectivityManager.CONNECTIVITY_ACTION)
             if (checkInternetConnection(context!!)) {
                 Log.d(TAG, "onReceive: network true")
-                onNetworkStateChange(true)
+                onNetworkStateChange?.invoke(true)
             } else {
                 Log.d(TAG, "onReceive: network false")
-                onNetworkStateChange(false)
+                onNetworkStateChange?.invoke(false)
             }
     }
 
@@ -42,7 +43,7 @@ class ConnectivityReciever(val onNetworkStateChange: (connected: Boolean) -> Uni
                             capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
 
                     ))
-        }?:false
+        } ?: false
 
     }
 }

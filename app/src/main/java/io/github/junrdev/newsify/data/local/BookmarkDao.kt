@@ -11,7 +11,7 @@ import io.github.junrdev.newsify.model.NewsItem
 @Dao
 interface BookmarkDao {
 
-    @Update(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBookMark(newsItem : NewsItem)
 
     @Query("SELECT * FROM news WHERE isBookMark=1")

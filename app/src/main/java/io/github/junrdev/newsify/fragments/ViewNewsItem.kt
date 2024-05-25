@@ -2,6 +2,9 @@ package io.github.junrdev.newsify.fragments
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -10,9 +13,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.palette.graphics.Palette
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import io.github.junrdev.newsify.R
 import io.github.junrdev.newsify.data.local.BookMarkRepository
 import io.github.junrdev.newsify.model.NewsItem
@@ -25,6 +32,7 @@ class ViewNewsItem(
 ) : Fragment() {
 
     lateinit var newsPreview: ImageView
+    lateinit var sheet: LinearLayout
     lateinit var newsTitle: TextView
     lateinit var newsDescription: TextView
     lateinit var newsAuthor: TextView
@@ -48,6 +56,7 @@ class ViewNewsItem(
             newsAuthor = findViewById(R.id.newsAuthor)
             readMore = findViewById(R.id.readMore)
             bookmarksNews = findViewById(R.id.bookmarksNews)
+            sheet = findViewById(R.id.sheet)
         }
 
         newsItem.apply {
@@ -55,10 +64,29 @@ class ViewNewsItem(
 
             urlToImage?.let {
                 Glide.with(context?.applicationContext!!)
+                    .asBitmap()
                     .load(urlToImage)
                     .centerCrop()
                     .placeholder(R.drawable.demoimg)
-                    .into(newsPreview)
+                    .into(
+                        object : CustomTarget<Bitmap>() {
+                            override fun onResourceReady(
+                                resource: Bitmap,
+                                transition: Transition<in Bitmap>?
+                            ) {
+                                Palette.from(resource).generate { palette ->
+                                    val dominantColor = palette?.dominantSwatch?.rgb ?: Color.BLACK
+                                    sheet.setBackgroundColor(dominantColor)
+                                    newsPreview.setImageBitmap(resource)
+                                }
+
+                            }
+
+                            override fun onLoadCleared(placeholder: Drawable?) {
+
+                            }
+                        }
+                    )
             }
 
             newsTitle.setText(title)
@@ -73,14 +101,29 @@ class ViewNewsItem(
                     intent.data = Uri.parse(link)
 
 //                    if (intent.resolveActivity(parentContext.packageManager) != null) {
-                        startActivity(intent)
+                    startActivity(intent)
 //                    }
                 }
             }
 
-            bookmarksNews.setOnClickListener {
-                bookMarkRepository.addToBookMark(newsItem)
+
+            when (isBookMark) {
+                true -> {
+                    bookmarksNews.setImageDrawable(resources.getDrawable(R.drawable.baseline_bookmark_added_24))
+                    bookmarksNews.setOnClickListener {
+                        return@setOnClickListener
+                    }
+                }
+
+                else -> {
+                    bookmarksNews.setImageDrawable(resources.getDrawable(R.drawable.baseline_bookmark_24))
+                    bookmarksNews.setOnClickListener {
+                        bookMarkRepository.addToBookMark(newsItem)
+                        bookmarksNews.setImageDrawable(resources.getDrawable(R.drawable.baseline_bookmark_added_24))
+                    }
+                }
             }
+
         }
 
         return view

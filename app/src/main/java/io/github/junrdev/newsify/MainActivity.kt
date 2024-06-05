@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity(), OnQueryTextListener {
         val connectivityManager =
             getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         registerReceiver(connectivityReciever, filter)
-        updateCache()
+//        updateCache()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
@@ -205,9 +205,9 @@ class MainActivity : AppCompatActivity(), OnQueryTextListener {
                     // add to cache
                     cacheRepository.deleteCachePast()
 
-                    if (news.articles.isNotEmpty()) {
+//                    if (news.articles.isNotEmpty()) {
                         cacheRepository.addNewsToCache(news.articles)
-                    }
+//                    }
 
                     withContext(Dispatchers.Main) {
                         val adapter =
@@ -260,18 +260,6 @@ class MainActivity : AppCompatActivity(), OnQueryTextListener {
 
          */
         return true
-    }
-
-    private val onNetworkStateChange = fun(state: Boolean) {
-        when (state) {
-            true -> {
-                noInternet.visibility = View.GONE
-            }
-
-            else -> {
-                noInternet.visibility = View.VISIBLE
-            }
-        }
     }
 
     private val updateCache = {

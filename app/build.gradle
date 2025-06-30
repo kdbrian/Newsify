@@ -1,3 +1,17 @@
+// Load API_KEY from local.properties or environment
+def getApiKey() {
+    def localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        def Properties properties = new Properties()
+        properties.load(new FileInputStream(localPropertiesFile))
+        return properties.getProperty("API_KEY", "")
+    } else {
+        return System.getenv("API_KEY") ?: ""
+    }
+}
+
+
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -21,6 +35,10 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Provide fallback for CI if local.properties is not present
+    buildConfigField "String", "API_KEY", "\"${getApiKey()}\""
+
+
     buildTypes {
         release {
             minifyEnabled false
@@ -34,11 +52,6 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
-    }
-
-    secrets {
-        propertiesFileName 'secret.properties'
-        ignoreList.add("sdk.*")
     }
 
     buildFeatures{

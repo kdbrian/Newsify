@@ -1,0 +1,49 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      versionName: ${{ steps.version.outputs.versionName }}
+      versionCode: ${{ steps.version.outputs.versionCode }}
+      shortSha: ${{ steps.short_sha.outputs.short }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Create local.properties
+        run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Make Gradle Executable
+        run: chmod +x ./gradlew
+
+      - name: Extract App Version
+        id: version
+        run: |
+          VERSION_NAME=$(./gradlew -q :app:properties | grep "versionName:" | awk '{print $2}')
+          VERSION_CODE=$(./gradlew -q :app:properties | grep "versionCode:" | awk '{print $2}')
+          echo "versionName=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "versionCode=$VERSION_CODE" >> $GITHUB_OUTPUT
+
+      - name: Build APK for Selected Flavor
+        run: ./gradlew assembleDebug
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: app/build/outputs/apk/${{ github.event.inputs.flavor }}/debug/*.apk
+
+      - name: Get Short SHA
+        id: short_sha
+        run: echo "short=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
